@@ -86,6 +86,7 @@ public class LabStudioService
         {
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "SEI", DbType.String);
+            sp_parameters.Add("Id", Id, DbType.String);
             var result = await _repository.Initialize(spName, sp_parameters).GetById();
             LabStudioDtoItem item = null!;
             if (result is not null)

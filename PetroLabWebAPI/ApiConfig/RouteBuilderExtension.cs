@@ -178,6 +178,27 @@ public static class RouteBuilderExtension
         .RequireAuthorization()
         .Produces<GetDoctorByIdResponse>();
 
+        group.MapPost("/insertlabstudioondoctor", async (InsertNewLabStudioCommand _service,
+            [FromBody] ManageDoctorLabStudioRequest request) =>
+        {
+            _service.Request = request;
+            var response = await _service.ExecuteAsync();
+            return response;
+        }).WithName("InsertLabStudioOnDoctor")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapDelete("/deletelabstudioondoctor", async (IDoctorService _service,
+            [FromBody] ManageDoctorLabStudioRequest request) =>
+        {
+            var response = await _service.DeleteDoctorLabStudio(request);
+            return response;
+        }).WithName("DeleteLabStudioOnDoctor")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
         return group;
     }
 

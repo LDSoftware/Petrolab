@@ -95,6 +95,8 @@ builder.Services.AddTransient<ISecurityTokenService, SecurityTokenService>();
 builder.Services.AddTransient<IIdentityClaimService, IdentityClaimService>();
 builder.Services.AddTransient<ValidateNoDuplicateBranchOnUser>();
 builder.Services.AddTransient<InsertNewBrachCommand>();
+builder.Services.AddTransient<ValidateNoDuplicateLabStudioOnDoctor>();
+builder.Services.AddTransient<InsertNewLabStudioCommand>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddCors(options =>
