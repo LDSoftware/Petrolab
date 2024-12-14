@@ -68,11 +68,17 @@ public class UserManagmentService
             var role = await _roleManager.FindByNameAsync(request.Role);
             var assignedRole = await _userManager.AddToRoleAsync(identityUser, role?.Name!);
 
-            string selectedBranchs = string.Join(",", request.Branch);
+            string selectedBranchs = string.Join(",", request.Branch.Select(e => e.BranchId));
+            var principalBranch = request.Branch.Where(p => p.IsPrincipal.Equals(true));
+
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "INS", DbType.String);
             sp_parameters.Add("UserId", identityUser.Id, DbType.String);
             sp_parameters.Add("SelectedBranch", selectedBranchs, DbType.String);
+            if (principalBranch != null && principalBranch.Any())
+            {
+                sp_parameters.Add("BranchIdPrincipal", principalBranch.First().BranchId, DbType.Int64);
+            }
             var resultBranch = await _branchUserMapRepository.Initialize(spName, sp_parameters).InsertOrUpdate();
             if (!resultBranch.Success)
             {
@@ -276,12 +282,14 @@ public class UserManagmentService
             List<UserBranchDtoItem> branchs = new();
             if (resultBranch.Any())
             {
-                branchs.AddRange(resultBranch.Select(b => new UserBranchDtoItem(b.Id, b.BranchId, b.BranchName)));
+                branchs.AddRange(resultBranch.Select(b => new UserBranchDtoItem(b.Id,
+                b.BranchId, b.BranchName, b.IsPrincipal)));
             }
             return branchs;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             return new();
         }
     }
@@ -295,11 +303,17 @@ public class UserManagmentService
                 return new(Code: 403, Message: "Forbidden");
             }
 
-            string selectedBranchs = string.Join(",", request.Branch);
+            string selectedBranchs = string.Join(",", request.Branch.Select(e => e.BranchId));
+            var principalBranch = request.Branch.Where(p => p.IsPrincipal.Equals(true));
+
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "INS", DbType.String);
             sp_parameters.Add("UserId", request.UserId, DbType.String);
             sp_parameters.Add("SelectedBranch", selectedBranchs, DbType.String);
+            if (principalBranch != null && principalBranch.Any())
+            {
+                sp_parameters.Add("BranchIdPrincipal", principalBranch.First().BranchId, DbType.Int64);
+            }            
             var resultBranch = await _branchUserMapRepository.Initialize(spName, sp_parameters).InsertOrUpdate();
             if (!resultBranch.Success)
             {
@@ -332,7 +346,7 @@ public class UserManagmentService
             if (!resultBranch.Success)
             {
                 throw new Exception(resultBranch.Message);
-            }            
+            }
 
             return new();
         }

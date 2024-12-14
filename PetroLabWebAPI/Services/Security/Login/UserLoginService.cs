@@ -10,6 +10,7 @@ public class UserLoginService
 (
     SignInManager<User> _signInManager,
     UserManager<User> _userManager,
+    RoleManager<IdentityRole> _roleManager,
     ISecurityTokenService _securityTokenService,
     IRoleManagmentService _roleManagmentService
 ) : IUserLoginService
@@ -30,21 +31,8 @@ public class UserLoginService
                 var role = await _userManager.GetRolesAsync(identityUser!);
 
                 var result = await _signInManager.PasswordSignInAsync(identityUser!, request.Password, false, false);
-                var userRole = await _roleManagmentService.GetRoles();
-                string IdRole = string.Empty;
+                string IdRole = role.Any() ? role.First() : string.Empty;
 
-                if (userRole.ServiceStatus.Code.Equals(200))
-                {
-                    var existRole = userRole.DataResult!.FirstOrDefault(e => e.Name.Equals(role.First()));
-                    if (existRole == null)
-                    {
-                        IdRole = "0";
-                    }
-                    else
-                    {
-                        IdRole = userRole.DataResult!.FirstOrDefault(e => e.Name.Equals(role.First()))?.Id!;
-                    }
-                }
                 if (result.Succeeded)
                 {
                     LoginDtoItem loginInfo = new(
@@ -52,6 +40,7 @@ public class UserLoginService
                         identityUser.FirstName,
                         identityUser.LastName,
                         identityUser.MotherLastName,
+                        IdRole,
                         _securityTokenService.CreateUserToken(identityUser!, role.First()));
 
                     return new(loginInfo, new());

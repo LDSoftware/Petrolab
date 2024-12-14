@@ -10,4 +10,4 @@ string MotherLastName,
 bool IsLocked,
 List<UserBranchDtoItem>? Branchs);
 
-public record UserBranchDtoItem(long Id, long BranchId, string BranchName);
+public record UserBranchDtoItem(long Id, long BranchId, string BranchName, bool IsPrincipal);

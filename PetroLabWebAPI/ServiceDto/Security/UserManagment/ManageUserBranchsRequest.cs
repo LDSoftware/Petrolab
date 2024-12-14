@@ -1,4 +1,4 @@
 namespace PetroLabWebAPI.ServiceDto.Security.UserManagment;
 
-public record ManageUserBranchsRequest(string UserId, List<long> Branch);
+public record ManageUserBranchsRequest(string UserId, List<SelectedBrach> Branch);
 
