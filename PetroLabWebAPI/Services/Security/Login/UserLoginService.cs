@@ -10,9 +10,7 @@ public class UserLoginService
 (
     SignInManager<User> _signInManager,
     UserManager<User> _userManager,
-    RoleManager<IdentityRole> _roleManager,
-    ISecurityTokenService _securityTokenService,
-    IRoleManagmentService _roleManagmentService
+    ISecurityTokenService _securityTokenService
 ) : IUserLoginService
 {
 

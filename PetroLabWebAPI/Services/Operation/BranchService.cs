@@ -13,8 +13,7 @@ namespace PetroLabWebAPI.Services;
 public class BranchService
 (
     IRepository<Branch> _repository,
-    IRepository<LabBranchDoctorMap> _repositoryMap,
-    IMapper _mapper
+    IRepository<LabBranchDoctorMap> _repositoryMap
 ) : IBranchService
 {
     private const string spName = "sp_AdminLabBranch";
