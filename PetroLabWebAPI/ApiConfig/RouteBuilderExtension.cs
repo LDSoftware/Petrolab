@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetroLabWebAPI.ServiceDto.Branch.Request;
 using PetroLabWebAPI.ServiceDto.Branch.Response;
@@ -71,6 +70,27 @@ public static class RouteBuilderExtension
         .WithOpenApi()
         .RequireAuthorization()
         .Produces<GetBranchResponse>();
+
+        group.MapPost("/createnewdoctortobranch", async (InsertNewDoctorCommand _service,
+            [FromBody] CreateDoctorBranchRequest request) =>
+        {
+            _service.Request = request;
+            var response = await _service.ExecuteAsync();
+            return response;
+        }).WithName("CreateNewDoctorToBranch")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CreateActionResponse>();
+
+        group.MapDelete("/deletenewdoctortobranch", async (IBranchService _service,
+            [FromBody] DeleteDoctorBranchRequest request) =>
+        {
+            var response = await _service.DeleteDoctorToBranch(request);
+            return response;
+        }).WithName("DeleteNewDoctorToBranch")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CreateActionResponse>();
 
         return group;
     }
@@ -385,7 +405,7 @@ public static class RouteBuilderExtension
         .Produces<CommonActionResponse>();
 
         group.MapDelete("/deletebranchonuser", async (IUserManagmentService _service,
-            [FromBody] ManageUserBranchsRequest request) =>
+            [FromBody] DelteUserBranchsRequest request) =>
         {
             var response = await _service.DeleteBranchOnUser(request);
             return response;
@@ -393,6 +413,16 @@ public static class RouteBuilderExtension
         .WithOpenApi()
         .RequireAuthorization()
         .Produces<CommonActionResponse>();
+
+        group.MapPut("/setbranchtoprincipal", async (IUserManagmentService _service,
+            [FromBody] UpdateUserBranchToPrincipalRequest request) =>
+        {
+            var response = await _service.SetBranchToPrincipal(request);
+            return response;
+        }).WithName("SetBranchToPrincipal")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();        
 
         return group;
     }

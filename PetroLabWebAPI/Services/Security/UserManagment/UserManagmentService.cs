@@ -42,6 +42,17 @@ public class UserManagmentService
                 throw new Exception("Bad Request");
             }
 
+            if (request.Branch.Where(r => r.IsPrincipal.Equals(true)).Count() > 1)
+            {
+                return new(Code: 400, Message: "Bad Request - Solo se puede tener una sucursal como principal");
+            }
+
+            var existRole = _roleManager.Roles.Where(r => r.Name!.Equals(request.Role));
+            if (!existRole.Any())
+            {
+                return new(Code: 400, Message: $"Bad Request - El Role {request.Role} no existe!");
+            }
+
             var passwordResult = _userManager.PasswordHasher.HashPassword(
                 new User()
                 {
@@ -313,7 +324,7 @@ public class UserManagmentService
             if (principalBranch != null && principalBranch.Any())
             {
                 sp_parameters.Add("BranchIdPrincipal", principalBranch.First().BranchId, DbType.Int64);
-            }            
+            }
             var resultBranch = await _branchUserMapRepository.Initialize(spName, sp_parameters).InsertOrUpdate();
             if (!resultBranch.Success)
             {
@@ -328,7 +339,7 @@ public class UserManagmentService
         }
     }
 
-    public async Task<CommonActionResponse> DeleteBranchOnUser(ManageUserBranchsRequest request)
+    public async Task<CommonActionResponse> DeleteBranchOnUser(DelteUserBranchsRequest request)
     {
         try
         {
@@ -343,6 +354,33 @@ public class UserManagmentService
             sp_parameters.Add("UserId", request.UserId, DbType.String);
             sp_parameters.Add("SelectedBranch", selectedBranchs, DbType.String);
             var resultBranch = await _branchUserMapRepository.Initialize(spName, sp_parameters).Delete();
+            if (!resultBranch.Success)
+            {
+                throw new Exception(resultBranch.Message);
+            }
+
+            return new();
+        }
+        catch (Exception ex)
+        {
+            return new(500, ex.Message);
+        }
+    }
+
+    public async Task<CommonActionResponse> SetBranchToPrincipal(UpdateUserBranchToPrincipalRequest request)
+    {
+        try
+        {
+            if (!_identityClaimService.GetRoleNameClaim(_httpContextAccessor.HttpContext!).Equals("Administrator"))
+            {
+                return new(Code: 403, Message: "Forbidden");
+            }
+
+            DynamicParameters sp_parameters = new DynamicParameters();
+            sp_parameters.Add("Action", "UPD", DbType.String);
+            sp_parameters.Add("UserId", request.UserId, DbType.String);
+            sp_parameters.Add("BranchIdPrincipal", request.BranchId, DbType.String);
+            var resultBranch = await _branchUserMapRepository.Initialize(spName, sp_parameters).InsertOrUpdate();
             if (!resultBranch.Success)
             {
                 throw new Exception(resultBranch.Message);

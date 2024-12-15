@@ -97,6 +97,8 @@ builder.Services.AddTransient<ValidateNoDuplicateBranchOnUser>();
 builder.Services.AddTransient<InsertNewBrachCommand>();
 builder.Services.AddTransient<ValidateNoDuplicateLabStudioOnDoctor>();
 builder.Services.AddTransient<InsertNewLabStudioCommand>();
+builder.Services.AddTransient<InsertNewDoctorCommand>();
+builder.Services.AddTransient<ValidateNoDuplicateDoctorOnBranch>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddCors(options =>
