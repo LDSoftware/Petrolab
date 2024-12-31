@@ -272,6 +272,16 @@ public static class RouteBuilderExtension
         .RequireAuthorization()
         .Produces<GetLabStudioByIdResponse>();
 
+
+        group.MapGet("/getlabstudiospeciality", async (ILabStudioService _service) =>
+        {
+            var response = await _service.GetLabStudioBySpecialtyAsync();
+            return response;
+        }).WithName("GetLabStudioBySpecialtyAsync")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabSpecialtyResponse>();        
+
         return group;
     }
 

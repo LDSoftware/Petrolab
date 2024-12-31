@@ -13,5 +13,5 @@ public interface IDoctorService
     Task<GetDoctorByIdResponse> GetDoctorByIdAsync(long Id);
     Task<CommonActionResponse> InsertNewDoctorLabStudio(ManageDoctorLabStudioRequest request);
     Task<CommonActionResponse> DeleteDoctorLabStudio(ManageDoctorLabStudioRequest request);
-    Task<List<GetLabStudioDtoItem>> GetLabStudiosByDoctor(long IdDoctor);
+    Task<List<GetDoctorLabStudioDtoItem>> GetLabStudiosByDoctor(long IdDoctor);
 }

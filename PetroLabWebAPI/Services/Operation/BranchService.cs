@@ -1,6 +1,4 @@
 using System.Data;
-using System.Security.Permissions;
-using AutoMapper;
 using Dapper;
 using PetroLabWebAPI.Data.Domain;
 using PetroLabWebAPI.Data.Repository;
