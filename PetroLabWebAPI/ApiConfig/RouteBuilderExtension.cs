@@ -280,7 +280,16 @@ public static class RouteBuilderExtension
         }).WithName("GetLabStudioBySpecialtyAsync")
         .WithOpenApi()
         .RequireAuthorization()
-        .Produces<GetLabSpecialtyResponse>();        
+        .Produces<GetLabSpecialtyResponse>();
+
+        group.MapGet("/getlabstudiospecialitygamas", async (ILabStudioService _service) =>
+        {
+            var response = await _service.GetLabSpecialityGamasAsync();
+            return response;
+        }).WithName("GetLabSpecialityGamas")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabSpecialityGamasResponse>();         
 
         return group;
     }
@@ -432,7 +441,7 @@ public static class RouteBuilderExtension
         }).WithName("SetBranchToPrincipal")
         .WithOpenApi()
         .RequireAuthorization()
-        .Produces<CommonActionResponse>();        
+        .Produces<CommonActionResponse>();
 
         return group;
     }

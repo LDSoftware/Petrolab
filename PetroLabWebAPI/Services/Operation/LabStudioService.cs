@@ -14,11 +14,13 @@ public class LabStudioService
     IRepository<LabStudio> _repository,
     IRepository<LabSpecialty> _specialtyRepository,
     IRepository<GetLabStudioDtoItem> _getLabStudioRepository,
+    IRepository<LabSpecialityGamas> _specialityGamasRepository,
     IMapper _mapper
 ) : ILabStudioService
 {
     private const string spName = "sp_AdminLabStudio";
     private const string spSpecialtyName = "sp_GetLabSpecialty";
+    private const string spGetLabSpecialityGamas = "sp_GetLabSpecialityGamas";
 
     public async Task<CreateActionResponse> CreateAsync(CreateLabStudioRequest request)
     {
@@ -62,6 +64,34 @@ public class LabStudioService
         catch (Exception ex)
         {
             return new(500, ex.Message);
+        }
+    }
+
+    public async Task<GetLabSpecialityGamasResponse> GetLabSpecialityGamasAsync()
+    {
+        try
+        {
+            DynamicParameters sp_parameters = new();
+            var result = await _specialityGamasRepository.Initialize(spGetLabSpecialityGamas, sp_parameters).Table();
+            List<LabSpecialityGamasDtoItem> items = new();
+
+            if (result is not null && result.Any())
+            {
+                var specialities = result.GroupBy(g => g.SpecialityId);
+                foreach (var speciality in specialities)
+                {
+                    var speciilityName = result.Where(s => s.SpecialityId.Equals(speciality.Key)).FirstOrDefault()!.SpecialityName;
+                    var labStudios = result.Where(s => s.SpecialityId.Equals(speciality.Key))
+                        .Select(r => new { r.Id, r.Code, r.Type, r.Name, r.SpecialityName });
+                    items.Add(new LabSpecialityGamasDtoItem(speciality.Key,speciilityName, labStudios.Select(x => new LabSpecialityGamaDtoItem(x.Id, x.Name, x.Code, x.Type, speciality.Key, x.SpecialityName)).ToList()));
+                }
+            }
+
+            return new(items, new());
+        }
+        catch (Exception ex)
+        {
+            return new(null, new(500, ex.Message));
         }
     }
 
@@ -112,7 +142,7 @@ public class LabStudioService
             DynamicParameters sp_parameters = new();
             var result = await _specialtyRepository.Initialize(spSpecialtyName, sp_parameters).Table();
             List<LabSpecialtyDtoItem> items = new();
-            if(result is not null && result.Any())
+            if (result is not null && result.Any())
             {
                 items.AddRange(result.Select(x => new LabSpecialtyDtoItem(x.Id, x.Name)));
             }
