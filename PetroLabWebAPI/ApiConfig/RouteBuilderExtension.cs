@@ -12,6 +12,7 @@ using PetroLabWebAPI.ServiceDto.Security.Login;
 using PetroLabWebAPI.ServiceDto.Security.RoleManagment;
 using PetroLabWebAPI.ServiceDto.Security.UserManagment;
 using PetroLabWebAPI.Services;
+using PetroLabWebAPI.Services.Operation;
 using PetroLabWebAPI.Services.Security.Login;
 using PetroLabWebAPI.Services.Security.RoleManagment;
 using PetroLabWebAPI.Services.Security.UserManagment;
@@ -91,6 +92,42 @@ public static class RouteBuilderExtension
         .WithOpenApi()
         .RequireAuthorization()
         .Produces<CreateActionResponse>();
+
+        return group;
+    }
+
+
+    public static RouteGroupBuilder MapScheduleBranchApi(this RouteGroupBuilder group)
+    {
+        group.MapPost("/addschedulebranch", async (IBranchSheduleService _service,
+            [FromBody] CreateBranchScheduleRequest request) =>
+        {
+            var response = await _service.AddScheduleAsync(request);
+            return response;
+        }).WithName("AddSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPost("/addschedulebranchtemp", async (IBranchSheduleService _service,
+            [FromBody] CreateScheduleTempRequest request) =>
+        {
+            var response = await _service.AddScheduleTempAsync(request);
+            return response;
+        }).WithName("AddScheduleTemp")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();        
+
+        group.MapPost("/addschedulebranchdoctor", async (IBranchSheduleService _service,
+            [FromBody] CreateScheduleDoctorRequest request) =>
+        {
+            var response = await _service.AddScheduleDoctorAsync(request);
+            return response;
+        }).WithName("AddDoctor")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();  
 
         return group;
     }

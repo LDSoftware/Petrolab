@@ -72,18 +72,19 @@ public class LabStudioService
         try
         {
             DynamicParameters sp_parameters = new();
+            var groups = await _specialtyRepository.Initialize(spSpecialtyName, sp_parameters).Table();
             var result = await _specialityGamasRepository.Initialize(spGetLabSpecialityGamas, sp_parameters).Table();
             List<LabSpecialityGamasDtoItem> items = new();
 
             if (result is not null && result.Any())
             {
-                var specialities = result.GroupBy(g => g.SpecialityId);
-                foreach (var speciality in specialities)
-                {
-                    var speciilityName = result.Where(s => s.SpecialityId.Equals(speciality.Key)).FirstOrDefault()!.SpecialityName;
-                    var labStudios = result.Where(s => s.SpecialityId.Equals(speciality.Key))
-                        .Select(r => new { r.Id, r.Code, r.Type, r.Name, r.SpecialityName });
-                    items.Add(new LabSpecialityGamasDtoItem(speciality.Key,speciilityName, labStudios.Select(x => new LabSpecialityGamaDtoItem(x.Id, x.Name, x.Code, x.Type, speciality.Key, x.SpecialityName)).ToList()));
+                foreach (var speciality in groups)
+                {                    
+                    var labStudios = result.Where(s => s.SpecialityId.Equals(speciality.Id))
+                        .Select(r => new { r.Id, r.Code, r.Type, r.Name, r.SpecialityName });                        
+                    items.Add(new LabSpecialityGamasDtoItem(speciality.Id,speciality.Name, labStudios
+                    .Select(x => new LabSpecialityGamaDtoItem(x.Id, x.Name, x.Code, x.Type, speciality.Id, x.SpecialityName))
+                    .ToList()));
                 }
             }
 
