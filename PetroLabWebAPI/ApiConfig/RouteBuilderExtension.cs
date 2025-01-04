@@ -138,6 +138,16 @@ public static class RouteBuilderExtension
         .RequireAuthorization()
         .Produces<CommonActionResponse>();
 
+        group.MapPut("/updateschedulebranch", async (IBranchSheduleService _service,
+            [FromBody] UpdateBranchScheduleRequest request) =>
+        {
+            var response = await _service.UpdateScheduleAsync(request);
+            return response;
+        }).WithName("UpdateSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
         group.MapPut("/updateschedulebranchtemp", async (IBranchSheduleService _service,
             [FromBody] UpdateScheduleTempRequest request) =>
         {
@@ -157,6 +167,35 @@ public static class RouteBuilderExtension
         .WithOpenApi()
         .RequireAuthorization()
         .Produces<CommonActionResponse>();
+
+        group.MapDelete("/removeschedulebranchdoctor", async (IBranchSheduleService _service,
+            [FromBody] long IdDoctor) =>
+        {
+            var response = await _service.RemoveDoctorAsync(IdDoctor);
+            return response;
+        })
+        .WithName("RemoveDoctor")
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapDelete("/removeschedulebranchtemp", async (IBranchSheduleService _service,
+            [FromBody] long IdScheduleTemp) =>
+        {
+            var response = await _service.RemoveScheduleTempAsync(IdScheduleTemp);
+            return response;
+        })
+        .WithName("RemoveScheduleTemp")
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapGet("/getbranchschedule", async (long idBranch, IBranchSheduleService _service) =>
+        {
+            var response = await _service.GetBranchScheduleAsync(idBranch);
+            return response;
+        }).WithName("GetBranchSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetBranchScheduleResponse>();
 
         return group;
     }

@@ -1,8 +1,10 @@
 using System.Data;
 using Dapper;
+using PetroLabWebAPI.Data.Domain;
 using PetroLabWebAPI.Data.ExecutionModel;
 using PetroLabWebAPI.Data.Repository;
 using PetroLabWebAPI.ServiceDto.Branch.Request;
+using PetroLabWebAPI.ServiceDto.Branch.Response;
 using PetroLabWebAPI.ServiceDto.Common;
 
 namespace PetroLabWebAPI.Services.Operation;
@@ -252,6 +254,64 @@ public class BranchSheduleService
         catch (Exception ex)
         {
             return new(0, 500, ex.Message);
+        }
+    }
+
+    public async Task<CommonActionResponse> UpdateScheduleAsync(UpdateBranchScheduleRequest request)
+    {
+        try
+        {
+            var responseUpdateSchduleTemp = await UpdateScheduleTempAsync(
+                new(request.IdLabBranch, request.ScheduleTemp));
+
+            var responseUpdateSchduleDoctor = await UpdateScheduleDoctorAsync(
+                new(request.IdLabBranch, request.Doctors));
+
+            return new();
+        }
+        catch (Exception ex)
+        {
+            return new(500, ex.Message);
+        }
+    }
+
+    public async Task<GetBranchScheduleResponse> GetBranchScheduleAsync(long IdBranch)
+    {
+        try
+        {
+            var branch = await _branchService.GetBranchByIdAsync(IdBranch);
+            if (branch.ServiceStatus.Code != 200)
+            {
+                throw new Exception(branch.ServiceStatus.Message);
+            }
+
+            DynamicParameters sp_parameters = new();
+
+            sp_parameters.Add("Action", "SEL", DbType.String);
+            sp_parameters.Add("@IdLabBranch", IdBranch, DbType.Int64);
+
+            var branchSchedule = await _storedProcRepository.Initialize(_spAdminLabSchedule, sp_parameters)
+                .ReturnCollection<LabBranchSchedule>();
+
+            var branchScheduleTemp = await _storedProcRepository.Initialize(_spAdminLabScheduleTemp, sp_parameters)
+                .ReturnCollection<LabBranchScheduleTemp>();
+
+            var branchScheduleDoctor = await _storedProcRepository.Initialize(_spAdminLabScheduleDoctor, sp_parameters)
+                .ReturnCollection<LabBranchScheduleDoctor>();
+
+            return new(
+                new(
+                    Branch: branch.DataResult,
+                    BranchSchedule: branchSchedule!.Select(x => new BranchScheduleDtoItem(x.Id, x.IdLabBranch, x.DayOfWeek, x.TimeInit, x.TimeEnd)).ToList(),
+                    BranchScheduleTemp: branchScheduleTemp!.Select(x => new BranchScheduleTempDtoItem(x.Id, x.IdLabBranch, x.Day, x.TimeInit, x.TimeEnd)).ToList(),
+                    BranchScheduleDoctor: branchScheduleDoctor!.Select(x => new BranchScheduleDoctorDtoItem(x.Id, x.IdLabBranch, x.TimeInit, x.TimeEnd, x.DoctorId)).ToList()
+                ),
+                new()
+            );
+        }
+        catch (Exception)
+        {
+            return new(null!, new(500, "Error"));
         }
     }
 }

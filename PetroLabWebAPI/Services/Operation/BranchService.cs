@@ -90,7 +90,7 @@ public class BranchService
             if (result.Any())
             {
                 items.AddRange(result
-                    .Select(r => new BranchDtoItem(r.Id, r.Code, r.Name, GetLabBranchDoctors(r.Id).Result)));
+                    .Select(r => new BranchDtoItem(r.Id, r.Code, r.Name)));
             }
             return new(items, new());
         }
@@ -111,7 +111,7 @@ public class BranchService
             BranchDtoItem item = null!;
             if (result is not null)
             {
-                item = new(result.Id, result.Code, result.Name, await GetLabBranchDoctors(result.Id));
+                item = new(result.Id, result.Code, result.Name);
             }
             return new(item, new());
         }
