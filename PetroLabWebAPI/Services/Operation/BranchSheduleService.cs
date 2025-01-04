@@ -9,7 +9,8 @@ namespace PetroLabWebAPI.Services.Operation;
 
 public class BranchSheduleService
 (
-    StoredProcRepository _storedProcRepository
+    StoredProcRepository _storedProcRepository,
+    IBranchService _branchService
 ) : IBranchSheduleService
 {
     private const string _spAdminLabSchedule = "sp_AdminLabSchedule";
@@ -20,19 +21,22 @@ public class BranchSheduleService
     {
         try
         {
-
-            DynamicParameters sp_parameters = new DynamicParameters();
-            sp_parameters.Add("Action", "INS", DbType.String);
-            sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
-            sp_parameters.Add("DoctorId", request.DoctorId, DbType.Int64);
-            sp_parameters.Add("TimeInit", request.TimeInit, DbType.String);
-            sp_parameters.Add("TimeEnd", request.TimeEnd, DbType.String);
-            var result = await _storedProcRepository
-            .Initialize(_spAdminLabScheduleDoctor, sp_parameters)
-            .Execute<CommonExecutionModel>();
-            if(result!.Code != 200)
+            DynamicParameters sp_parameters = new();
+            foreach (var item in request.Doctors)
             {
-                throw new Exception(result.Message);
+                sp_parameters = new DynamicParameters();
+                sp_parameters.Add("Action", "INS", DbType.String);
+                sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
+                sp_parameters.Add("DoctorId", item.DoctorId, DbType.Int64);
+                sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
+                sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
+                var result = await _storedProcRepository
+                .Initialize(_spAdminLabScheduleDoctor, sp_parameters)
+                .Execute<CommonExecutionModel>();
+                if (result!.Code != 200)
+                {
+                    throw new Exception(result.Message);
+                }
             }
             return new();
         }
@@ -98,18 +102,22 @@ public class BranchSheduleService
     {
         try
         {
-            DynamicParameters sp_parameters = new DynamicParameters();
-            sp_parameters.Add("Action", "INS", DbType.String);
-            sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
-            sp_parameters.Add("Day", request.Day, DbType.DateTime);
-            sp_parameters.Add("TimeInit", request.TimeInit, DbType.String);
-            sp_parameters.Add("TimeEnd", request.TimeEnd, DbType.String);
-            var result = await _storedProcRepository
-            .Initialize(_spAdminLabScheduleTemp, sp_parameters)
-            .Execute<CommonExecutionModel>();
-            if(result!.Code != 200)
+            DynamicParameters sp_parameters = new();
+            foreach (var item in request.ScheduleTemp)
             {
-                throw new Exception(result.Message);
+                sp_parameters = new DynamicParameters();
+                sp_parameters.Add("Action", "INS", DbType.String);
+                sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
+                sp_parameters.Add("Day", item.Day, DbType.DateTime);
+                sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
+                sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
+                var result = await _storedProcRepository
+                .Initialize(_spAdminLabScheduleTemp, sp_parameters)
+                .Execute<CommonExecutionModel>();
+                if (result!.Code != 200)
+                {
+                    throw new Exception(result.Message);
+                }
             }
             return new();
         }
@@ -129,7 +137,7 @@ public class BranchSheduleService
             var result = await _storedProcRepository
             .Initialize(_spAdminLabScheduleDoctor, sp_parameters)
             .Execute<CommonExecutionModel>();
-            if(result!.Code != 200)
+            if (result!.Code != 200)
             {
                 throw new Exception(result.Message);
             }
@@ -151,7 +159,7 @@ public class BranchSheduleService
             var result = await _storedProcRepository
             .Initialize(_spAdminLabScheduleTemp, sp_parameters)
             .Execute<CommonExecutionModel>();
-            if(result!.Code != 200)
+            if (result!.Code != 200)
             {
                 throw new Exception(result.Message);
             }
@@ -167,19 +175,24 @@ public class BranchSheduleService
     {
         try
         {
-            DynamicParameters sp_parameters = new DynamicParameters();
-            sp_parameters.Add("Action", "UPD", DbType.String);
-            sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
-            sp_parameters.Add("Id", request.Id, DbType.Int64);
-            sp_parameters.Add("DoctorId", request.DoctorId, DbType.Int64);
-            sp_parameters.Add("TimeInit", request.TimeInit, DbType.String);
-            sp_parameters.Add("TimeEnd", request.TimeEnd, DbType.String);
-            var result = await _storedProcRepository
-            .Initialize(_spAdminLabScheduleTemp, sp_parameters)
-            .Execute<CommonExecutionModel>();
-            if(result!.Code != 200)
+            DynamicParameters sp_parameters = new();
+
+            foreach (var item in request.Doctors)
             {
-                throw new Exception(result.Message);
+                sp_parameters = new DynamicParameters();
+                sp_parameters.Add("Action", "UPD", DbType.String);
+                sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
+                sp_parameters.Add("Id", item.Id, DbType.Int64);
+                sp_parameters.Add("DoctorId", item.DoctorId, DbType.Int64);
+                sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
+                sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
+                var result = await _storedProcRepository
+                .Initialize(_spAdminLabScheduleDoctor, sp_parameters)
+                .Execute<CommonExecutionModel>();
+                if (result!.Code != 200)
+                {
+                    throw new Exception(result.Message);
+                }
             }
             return new();
         }
@@ -193,25 +206,52 @@ public class BranchSheduleService
     {
         try
         {
-            DynamicParameters sp_parameters = new DynamicParameters();
-            sp_parameters.Add("Action", "UPD", DbType.String);
-            sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
-            sp_parameters.Add("Id", request.Id, DbType.Int64);
-            sp_parameters.Add("Day", request.Day, DbType.DateTime);
-            sp_parameters.Add("TimeInit", request.TimeInit, DbType.String);
-            sp_parameters.Add("TimeEnd", request.TimeEnd, DbType.String);
-            var result = await _storedProcRepository
-            .Initialize(_spAdminLabScheduleTemp, sp_parameters)
-            .Execute<CommonExecutionModel>();
-            if(result!.Code != 200)
+            DynamicParameters sp_parameters = new();
+            foreach (var item in request.ScheduleTemp)
             {
-                throw new Exception(result.Message);
+                sp_parameters = new DynamicParameters();
+                sp_parameters.Add("Action", "UPD", DbType.String);
+                sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
+                sp_parameters.Add("Id", item.Id, DbType.Int64);
+                sp_parameters.Add("Day", item.Day, DbType.DateTime);
+                sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
+                sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
+                var result = await _storedProcRepository
+                .Initialize(_spAdminLabScheduleTemp, sp_parameters)
+                .Execute<CommonExecutionModel>();
+                if (result!.Code != 200)
+                {
+                    throw new Exception(result.Message);
+                }
             }
             return new();
         }
         catch (Exception ex)
         {
             return new(500, ex.Message);
+        }
+    }
+
+    public async Task<CreateActionResponse> CreateBranchWithSchedule(CreateBranchWithScheduleRequest request)
+    {
+        try
+        {
+            var branchCreated = await _branchService.CreateAsync(request.BranchRequest);
+            if (branchCreated.Code != 200)
+            {
+                throw new Exception(branchCreated.Message);
+            }
+            var scheduleCreated = await AddScheduleAsync(
+                new(branchCreated.Id,
+                Schedule: request.ScheduleRequest.Schedule,
+                ScheduleTemp: request.ScheduleRequest.ScheduleTemp,
+                Doctors: request.ScheduleRequest.Doctors));
+
+            return new(branchCreated.Id);
+        }
+        catch (Exception ex)
+        {
+            return new(0, 500, ex.Message);
         }
     }
 }

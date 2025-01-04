@@ -96,9 +96,18 @@ public static class RouteBuilderExtension
         return group;
     }
 
-
     public static RouteGroupBuilder MapScheduleBranchApi(this RouteGroupBuilder group)
     {
+
+        group.MapPost("/createbranchwithschedule", async (IBranchSheduleService _service,
+            [FromBody] CreateBranchWithScheduleRequest request) =>
+        {
+            var response = await _service.CreateBranchWithSchedule(request);
+            return response;
+        }).WithName("CreateBranchWithSchedule").WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CreateActionResponse>();
+
         group.MapPost("/addschedulebranch", async (IBranchSheduleService _service,
             [FromBody] CreateBranchScheduleRequest request) =>
         {
@@ -117,7 +126,7 @@ public static class RouteBuilderExtension
         }).WithName("AddScheduleTemp")
         .WithOpenApi()
         .RequireAuthorization()
-        .Produces<CommonActionResponse>();        
+        .Produces<CommonActionResponse>();
 
         group.MapPost("/addschedulebranchdoctor", async (IBranchSheduleService _service,
             [FromBody] CreateScheduleDoctorRequest request) =>
@@ -127,7 +136,27 @@ public static class RouteBuilderExtension
         }).WithName("AddDoctor")
         .WithOpenApi()
         .RequireAuthorization()
-        .Produces<CommonActionResponse>();  
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/updateschedulebranchtemp", async (IBranchSheduleService _service,
+            [FromBody] UpdateScheduleTempRequest request) =>
+        {
+            var response = await _service.UpdateScheduleTempAsync(request);
+            return response;
+        }).WithName("UpdateScheduleTemp")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/updateschedulebranchdoctor", async (IBranchSheduleService _service,
+            [FromBody] UpdateScheduleDoctorRequest request) =>
+        {
+            var response = await _service.UpdateScheduleDoctorAsync(request);
+            return response;
+        }).WithName("UpdateScheduleDoctor")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
 
         return group;
     }
@@ -326,7 +355,7 @@ public static class RouteBuilderExtension
         }).WithName("GetLabSpecialityGamas")
         .WithOpenApi()
         .RequireAuthorization()
-        .Produces<GetLabSpecialityGamasResponse>();         
+        .Produces<GetLabSpecialityGamasResponse>();
 
         return group;
     }

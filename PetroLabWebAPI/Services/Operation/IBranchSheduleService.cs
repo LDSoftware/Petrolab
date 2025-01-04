@@ -5,6 +5,7 @@ namespace PetroLabWebAPI.Services.Operation;
 
 public interface IBranchSheduleService
 {
+    Task<CreateActionResponse> CreateBranchWithSchedule(CreateBranchWithScheduleRequest request);
     Task<CommonActionResponse> AddScheduleAsync(CreateBranchScheduleRequest request);
     Task<CommonActionResponse> AddScheduleTempAsync(CreateScheduleTempRequest request);
     Task<CommonActionResponse> UpdateScheduleTempAsync(UpdateScheduleTempRequest request);

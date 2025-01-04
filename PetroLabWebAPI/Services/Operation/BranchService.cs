@@ -20,11 +20,6 @@ public class BranchService
     {
         try
         {
-            if (request.Doctors.Where(d => d.Equals(0)).Any())
-            {
-                return new(0, 400, "Bad Request - El id del doctor no puede ser 0");
-            }
-
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "INS", DbType.String);
             sp_parameters.Add("Code", request.Code, DbType.String);
