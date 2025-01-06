@@ -113,6 +113,7 @@ public class BranchSheduleService
                 sp_parameters.Add("Day", item.Day, DbType.DateTime);
                 sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
                 sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
+                sp_parameters.Add("@IdDoctor", item.IdDoctor, DbType.Int64);
                 var result = await _storedProcRepository
                 .Initialize(_spAdminLabScheduleTemp, sp_parameters)
                 .Execute<CommonExecutionModel>();
@@ -218,6 +219,7 @@ public class BranchSheduleService
                 sp_parameters.Add("Day", item.Day, DbType.DateTime);
                 sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
                 sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
+                sp_parameters.Add("@IdDoctor", item.IdDoctor, DbType.Int64);
                 var result = await _storedProcRepository
                 .Initialize(_spAdminLabScheduleTemp, sp_parameters)
                 .Execute<CommonExecutionModel>();
@@ -303,7 +305,7 @@ public class BranchSheduleService
                 new(
                     Branch: branch.DataResult,
                     BranchSchedule: branchSchedule!.Select(x => new BranchScheduleDtoItem(x.Id, x.IdLabBranch, x.DayOfWeek, x.TimeInit, x.TimeEnd)).ToList(),
-                    BranchScheduleTemp: branchScheduleTemp!.Select(x => new BranchScheduleTempDtoItem(x.Id, x.IdLabBranch, x.Day, x.TimeInit, x.TimeEnd)).ToList(),
+                    BranchScheduleTemp: branchScheduleTemp!.Select(x => new BranchScheduleTempDtoItem(x.Id, x.IdLabBranch, x.Day, x.TimeInit, x.TimeEnd, x.IdDoctor)).ToList(),
                     BranchScheduleDoctor: branchScheduleDoctor!.Select(x => new BranchScheduleDoctorDtoItem(x.Id, x.IdLabBranch, x.TimeInit, x.TimeEnd, x.DoctorId)).ToList()
                 ),
                 new()

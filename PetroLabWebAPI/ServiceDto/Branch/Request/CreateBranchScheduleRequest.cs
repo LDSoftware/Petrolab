@@ -7,7 +7,7 @@ public record CreateBranchScheduleRequest(long IdLabBranch, IList<CreateSchedule
 IList<CreateScheduleTempItemDto> ScheduleTemp, IList<CreateScheduleDoctorItemDto> Doctors);
 
 public record CreateScheduleItemDto(string DayOfWeek, string TimeInit, string TimeEnd);
-public record CreateScheduleTempItemDto(DateTime Day, string TimeInit, string TimeEnd);
+public record CreateScheduleTempItemDto(DateTime Day, string TimeInit, string TimeEnd, long IdDoctor);
 public record CreateScheduleDoctorItemDto(long DoctorId, string TimeInit, string TimeEnd);
 
 public record CreateScheduleIRequest(long IdLabBranch, IList<CreateScheduleItemDto> Schedule);

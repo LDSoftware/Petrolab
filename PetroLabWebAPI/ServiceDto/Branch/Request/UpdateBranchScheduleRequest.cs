@@ -4,7 +4,7 @@ public record UpdateBranchScheduleRequest(long IdLabBranch, IList<UpdateSchedule
 IList<UpdateScheduleTempItemDto> ScheduleTemp, IList<UpdateScheduleDoctorItemDto> Doctors);
 
 public record UpdateScheduleItemDto(long Id, string DayOfWeek, string TimeInit, string TimeEnd);
-public record UpdateScheduleTempItemDto(long Id, DateTime Day, string TimeInit, string TimeEnd);
+public record UpdateScheduleTempItemDto(long Id, DateTime Day, string TimeInit, string TimeEnd, long IdDoctor);
 public record UpdateScheduleDoctorItemDto(long Id, long DoctorId, string TimeInit, string TimeEnd);
 
 

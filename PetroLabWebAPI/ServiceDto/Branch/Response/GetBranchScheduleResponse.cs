@@ -11,5 +11,5 @@ public record GetBranchScheduleDtoItem(BranchDtoItem? Branch,
     IList<BranchScheduleDoctorDtoItem> BranchScheduleDoctor);
 
 public record BranchScheduleDtoItem(long Id, long IdLabBranch, string DayOfWeek, string TimeInit, string TimeEnd);
-public record BranchScheduleTempDtoItem(long Id, long IdLabBranch, DateTime Day, string TimeInit, string TimeEnd);
+public record BranchScheduleTempDtoItem(long Id, long IdLabBranch, DateTime Day, string TimeInit, string TimeEnd, long IdDoctor);
 public record BranchScheduleDoctorDtoItem(long Id, long IdLabBranch, string TimeInit, string TimeEnd, long DoctorId);
