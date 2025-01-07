@@ -17,6 +17,10 @@ namespace PetroLabWebAPI.ApiConfig;
                 .WithTags("Customer");
 
             app.MapGroup("/api/v1")
+                .MapCustomerScheduleApi()
+                .WithTags("CustomerSchedule");
+
+            app.MapGroup("/api/v1")
                 .MapDoctorApi()
                 .WithTags("Doctor");
 

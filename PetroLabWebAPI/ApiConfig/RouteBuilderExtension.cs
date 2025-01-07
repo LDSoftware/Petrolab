@@ -8,6 +8,8 @@ using PetroLabWebAPI.ServiceDto.Doctor.Request;
 using PetroLabWebAPI.ServiceDto.Doctor.Response;
 using PetroLabWebAPI.ServiceDto.LabStudio.Request;
 using PetroLabWebAPI.ServiceDto.LabStudio.Response;
+using PetroLabWebAPI.ServiceDto.Schedule.Request;
+using PetroLabWebAPI.ServiceDto.Schedule.Response;
 using PetroLabWebAPI.ServiceDto.Security.Login;
 using PetroLabWebAPI.ServiceDto.Security.RoleManagment;
 using PetroLabWebAPI.ServiceDto.Security.UserManagment;
@@ -253,6 +255,51 @@ public static class RouteBuilderExtension
         return group;
     }
 
+    public static RouteGroupBuilder MapCustomerScheduleApi(this RouteGroupBuilder group)
+    {
+        group.MapPost("/createcustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] CreateCustomerScheduleRequest request) =>
+        {
+            var response = await _service.CreateCustomerScheduleAsync(request);
+            return response;
+        }).WithName("CreateCustomerSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/updatecustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] UpdateCustomerScheduleRequest request) =>
+        {
+            var response = await _service.UpdateCustomerScheduleAsync(request);
+            return response;
+        }).WithName("UpdateCustomerSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapDelete("/cancelcustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] CancelCustomerScheduleRequest request) =>
+        {
+            var response = await _service.CancelCustomerScheduleAsync(request);
+            return response;
+        }).WithName("CancelCustomerSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();        
+
+        group.MapPost("/getcustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] LabCustomerScheduleFilterRequest request) =>
+        {
+            var response = await _service.GetLabCustomerScheduleResponseAsync(request);
+            return response;
+        }).WithName("GetLabCustomerScheduleResponse")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabCustomerScheduleResponse>();
+
+        return group;
+    }
+    
     public static RouteGroupBuilder MapDoctorApi(this RouteGroupBuilder group)
     {
         group.MapPost("/createdoctor", async (IDoctorService _service,

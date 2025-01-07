@@ -95,6 +95,7 @@ builder.Services.AddTransient<IUserManagmentService, UserManagmentService>();
 builder.Services.AddTransient<ISecurityTokenService, SecurityTokenService>();
 builder.Services.AddTransient<IIdentityClaimService, IdentityClaimService>();
 builder.Services.AddTransient<IBranchSheduleService, BranchSheduleService>();
+builder.Services.AddTransient<ICustomerScheduleService, CustomerScheduleService>();
 builder.Services.AddTransient<ValidateNoDuplicateBranchOnUser>();
 builder.Services.AddTransient<InsertNewBrachCommand>();
 builder.Services.AddTransient<ValidateNoDuplicateLabStudioOnDoctor>();
