@@ -8,8 +8,14 @@ public class GetLabCustomerScheduleResponse(IList<LabCustomerScheduleDtoItem>? _
 public record LabCustomerScheduleDtoItem(
     long Id, string Name, string LastName, string MotherLastName, 
     string CellPhone, string Phone, string Email, DateTime StarDate,
-    DateTime EndDate, long IdLabStudio, long IdBranch, string? Comments,
+    DateTime EndDate, LabCustomerScheduleStudioDtoItem? LabStudio, 
+    CustomerScheduleBranchDtoItem? IdBranch, string? Comments,
     string? ProofOfPayment, bool Cancel, DateTime? CancelDate);
 
 public record LabCustomerScheduleFilterRequest( DateTime StarDate,
     DateTime EndDate, long IdLabStudio, long IdBranch, bool Cancel);
+
+public record LabCustomerScheduleStudioDtoItem(long Id, string Code, int Type, string Name);
+
+public record CustomerScheduleBranchDtoItem(long Id, string Code, string Name);
+

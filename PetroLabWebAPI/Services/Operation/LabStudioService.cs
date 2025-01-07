@@ -15,6 +15,7 @@ public class LabStudioService
     IRepository<LabSpecialty> _specialtyRepository,
     IRepository<GetLabStudioDtoItem> _getLabStudioRepository,
     IRepository<LabSpecialityGamas> _specialityGamasRepository,
+    StoredProcRepository _storedProcRepository,
     IMapper _mapper
 ) : ILabStudioService
 {
@@ -122,11 +123,11 @@ public class LabStudioService
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "SEI", DbType.String);
             sp_parameters.Add("Id", Id, DbType.String);
-            var result = await _repository.Initialize(spName, sp_parameters).GetById();
+            var result = await _storedProcRepository.Initialize(spName, sp_parameters).ReturnCollection<GetLabStudio>();
             LabStudioDtoItem item = null!;
             if (result is not null)
             {
-                item = _mapper.Map<LabStudioDtoItem>(result);
+                item = new(result.First().Id, result.First().Code, result.First().Type, result.First().Name, result.First().Duration, result.First().Specialty);
             }
             return new(item, new());
         }

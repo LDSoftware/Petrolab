@@ -11,7 +11,9 @@ namespace PetroLabWebAPI.Services.Operation;
 
 public class CustomerScheduleService
 (
-    StoredProcRepository _spAdminCustomerSchedule
+    StoredProcRepository _spAdminCustomerSchedule,
+    IBranchService _branchService,
+    ILabStudioService _labStudioService
 ) : ICustomerScheduleService
 {
     private const string _spName = "sp_AdminCustomerSchedule";
@@ -116,8 +118,8 @@ public class CustomerScheduleService
                 x.Email,
                 x.StarDate,
                 x.EndDate,
-                x.IdLabStudio,
-                x.IdBranch,
+                x.IdLabStudio == 0 ? null! : GetLabCustomerScheduleStudio(x.IdLabStudio),
+                x.IdBranch == 0 ? null! : GetCustomerScheduleBranch(x.IdBranch),
                 x.Comments,
                 x.ProofOfPayment,
                 x.Cancel,
@@ -163,5 +165,27 @@ public class CustomerScheduleService
         {
             return new(500, ex.Message);
         }
+    }
+
+    private LabCustomerScheduleStudioDtoItem GetLabCustomerScheduleStudio(long id)
+    {
+        var data = _labStudioService.GetLabStudioByIdAsync(id).Result;
+        if (data.DataResult == null)
+        {
+            return null!;
+        }
+
+        return new(data.DataResult!.Id, data.DataResult.Code, data.DataResult.Type, data.DataResult.Name);
+    }
+
+    private CustomerScheduleBranchDtoItem GetCustomerScheduleBranch(long id)
+    {
+        var data = _branchService.GetBranchByIdAsync(id).Result;
+        if (data.DataResult == null)
+        {
+            return null!;
+        }
+
+        return new(data.DataResult!.Id, data.DataResult.Code, data.DataResult.Name);
     }
 }
