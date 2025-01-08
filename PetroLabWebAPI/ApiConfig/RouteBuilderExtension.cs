@@ -199,6 +199,15 @@ public static class RouteBuilderExtension
         .RequireAuthorization()
         .Produces<GetBranchScheduleResponse>();
 
+        group.MapGet("/getallbranchschedule", async (IBranchSheduleService _service) =>
+        {
+            var response = await _service.GetAllBranchScheduleAsync();
+            return response;
+        }).WithName("GetAllBranchSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetAllBranchScheduleResponse>();        
+
         return group;
     }
 

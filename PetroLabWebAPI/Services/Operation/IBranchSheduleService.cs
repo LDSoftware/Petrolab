@@ -16,4 +16,5 @@ public interface IBranchSheduleService
     Task<CommonActionResponse> RemoveDoctorAsync(long Id);
     Task<CommonActionResponse> RemoveScheduleTempAsync(long Id);
     Task<GetBranchScheduleResponse> GetBranchScheduleAsync(long IdBranch);
+    Task<GetAllBranchScheduleResponse> GetAllBranchScheduleAsync();
 }

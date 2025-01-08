@@ -5,6 +5,9 @@ namespace PetroLabWebAPI.ServiceDto.Branch.Response;
 public class GetBranchScheduleResponse(GetBranchScheduleDtoItem? _dataResult, CommonActionResponse _commonActionResponse)
 : GetCommonReponse<GetBranchScheduleDtoItem?>(_dataResult, _commonActionResponse);
 
+public class GetAllBranchScheduleResponse(IList<GetBranchScheduleDtoItem>? _dataResult, 
+CommonActionResponse _commonActionResponse) : GetCommonReponse<IList<GetBranchScheduleDtoItem>?>(_dataResult, _commonActionResponse);
+
 public record GetBranchScheduleDtoItem(BranchDtoItem? Branch, 
     IList<BranchScheduleDtoItem> BranchSchedule, 
     IList<BranchScheduleTempDtoItem> BranchScheduleTemp, 

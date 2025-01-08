@@ -316,4 +316,34 @@ public class BranchSheduleService
             return new(null!, new(500, "Error"));
         }
     }
+
+    public async Task<GetAllBranchScheduleResponse> GetAllBranchScheduleAsync()
+    {
+        try
+        {            
+            var branches = await _branchService.GetBranchAsync();
+            if (branches.ServiceStatus.Code != 200)
+            {
+                throw new Exception(branches.ServiceStatus.Message);
+            }
+
+            List<GetBranchScheduleDtoItem>? _dataResult = new();
+
+            foreach (var item in branches.DataResult!)
+            {
+                var branchSchedule = await GetBranchScheduleAsync(item.Id);
+                if (branchSchedule.ServiceStatus.Code != 200)
+                {
+                    throw new Exception(branchSchedule.ServiceStatus.Message);
+                }
+                _dataResult.Add(branchSchedule.DataResult!);
+            }
+
+            return new(_dataResult, new());
+        }
+        catch (Exception ex)
+        {
+            return new(null!, new(500, ex.Message));
+        }
+    }
 }
