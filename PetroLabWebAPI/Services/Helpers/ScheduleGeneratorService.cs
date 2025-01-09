@@ -2,27 +2,27 @@ namespace PetroLabWebAPI.Services.Helpers;
 
 public class ScheduleGeneratorService : IScheduleGeneratorService
 {
-    public List<DateTime> GenerateSchedule(int month)
+    public List<DateTime> GenerateSchedule(DateTime startDate, DateTime endDate)
     {
         var schedule = new List<DateTime>();
-        var daysInMonth = DateTime.DaysInMonth(DateTime.Now.Year, month);
-        for (int i = 1; i <= daysInMonth; i++)
+        while (startDate <= endDate)
         {
-            schedule.Add(new DateTime(DateTime.Now.Year, month, i));
+            schedule.Add(startDate);
+            startDate = startDate.AddDays(1);
         }
         return schedule;
     }
 
-    public List<DateTime> GenerateScheduleHour(DateTime date, string startHour, string endHour)
+    public List<DateTime> GenerateScheduleHour(DateTime date, string startHour, string endHour, int interval)
     {
         DateTime startDate = DateTime.Parse($"{date.ToShortDateString()} {startHour}");
         DateTime endDate = DateTime.Parse($"{date.ToShortDateString()} {endHour}");
         List<DateTime> schedule = new();
 
-        while (startDate < endDate)
+        while (startDate <= endDate)
         {
             schedule.Add(startDate);
-            startDate = startDate.AddHours(1);
+            startDate = startDate.AddMinutes(interval);
         }
 
         return schedule;

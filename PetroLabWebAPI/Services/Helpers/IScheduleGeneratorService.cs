@@ -2,7 +2,7 @@ namespace PetroLabWebAPI.Services.Helpers;
 
 public interface IScheduleGeneratorService
 {
-    List<DateTime> GenerateSchedule(int month);
-    List<DateTime> GenerateScheduleHour(DateTime date, string startHour, string endHour);
+    List<DateTime> GenerateSchedule(DateTime startDate, DateTime endDate);
+    List<DateTime> GenerateScheduleHour(DateTime date, string startHour, string endHour, int interval);
     string GetDayOfWeek(string day);
 }

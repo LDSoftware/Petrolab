@@ -362,16 +362,37 @@ public class BranchSheduleService
             var branchSchedule = await _storedProcRepository.Initialize(_spAdminLabSchedule, sp_parameters)
                 .ReturnCollection<LabBranchSchedule>();
 
-            var scheduleMonth = _scheduleGeneratorService.GenerateSchedule(request.Month);
+            var scheduleMonth = _scheduleGeneratorService.GenerateSchedule(request.startDate, request.endDate);
+            var labStudio = await _labStudioService.GetLabStudioByIdAsync(request.IdLabStudio);
+            if (labStudio.ServiceStatus.Code != 200)
+            {
+                throw new Exception(labStudio.ServiceStatus.Message);
+            }
+
+            var branchScheduleTemp = await _storedProcRepository.Initialize(_spAdminLabScheduleTemp, sp_parameters)
+                .ReturnCollection<LabBranchScheduleTemp>();
+
             List<DateTime> schedule = new();
             foreach (var item in scheduleMonth!)
             {
+                bool isTempDay = branchScheduleTemp!.Any(x => x.Day == item);
+                var scheduleTemp = branchScheduleTemp!.FirstOrDefault(x => x.Day == item);
                 foreach (var element in branchSchedule!)
                 {
-                    if (element.DayOfWeek == _scheduleGeneratorService.GetDayOfWeek(item.DayOfWeek.ToString()))
+                    if (isTempDay)
                     {
-                        var scheduleHour = _scheduleGeneratorService.GenerateScheduleHour(item, element.TimeInit, element.TimeEnd);
+                        var scheduleHour = _scheduleGeneratorService
+                        .GenerateScheduleHour(item, scheduleTemp!.TimeInit, scheduleTemp.TimeEnd, labStudio.DataResult!.Duration);
                         schedule.AddRange(scheduleHour);
+                    }
+                    else
+                    {
+                        if (element.DayOfWeek == _scheduleGeneratorService.GetDayOfWeek(item.DayOfWeek.ToString()))
+                        {
+                            var scheduleHour = _scheduleGeneratorService
+                            .GenerateScheduleHour(item, element.TimeInit, element.TimeEnd, labStudio.DataResult!.Duration);
+                            schedule.AddRange(scheduleHour);
+                        }
                     }
                 }
             }
@@ -386,24 +407,17 @@ public class BranchSheduleService
 
             IList<ScheduleDateDtoItem>? _dataResult =
                 scheduleMonth
-                .Select(x => new ScheduleDateDtoItem(x.Day,
+                .Select(x => new ScheduleDateDtoItem(x.ToString("dd/MM/yyyy"),
                 schedule.Where(r => r.Day.Equals(x.Day))
-                .Select(s => new ScheduleHourDtoItem(s.ToShortTimeString(), false)).ToList()))
+                .Select(s => new ScheduleHourDtoItem(s.ToString("HH:mm:ss"), false)).ToList()))
                 .ToList();
 
-            foreach (var item in customerSchedule.DataResult!)
-            {
-                var labStudio = await _labStudioService.GetLabStudioByIdAsync(item.Id);
-                if (labStudio.ServiceStatus.Code != 200)
-                {
-                    throw new Exception(labStudio.ServiceStatus.Message);
-                }
+            /*             foreach (var item in customerSchedule.DataResult!)
+                        {
 
-                var scheduleDate = _dataResult.FirstOrDefault(d => d.Day == item.StarDate.Day);
-            }
-
-            var branchScheduleTemp = await _storedProcRepository.Initialize(_spAdminLabScheduleTemp, sp_parameters)
-                .ReturnCollection<LabBranchScheduleTemp>();
+                            var scheduleDate = _dataResult.FirstOrDefault(d => d.Day == item.StarDate.Day);
+                        }
+             */
 
             return new(_dataResult.Where(d => d.Hours.Count > 0).ToList(), new());
         }
