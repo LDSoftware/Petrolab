@@ -6,13 +6,16 @@ using PetroLabWebAPI.Data.Repository;
 using PetroLabWebAPI.ServiceDto.Branch.Request;
 using PetroLabWebAPI.ServiceDto.Branch.Response;
 using PetroLabWebAPI.ServiceDto.Common;
+using PetroLabWebAPI.ServiceDto.Schedule.Response;
+using PetroLabWebAPI.Services.Helpers;
 
 namespace PetroLabWebAPI.Services.Operation;
 
 public class BranchSheduleService
 (
     StoredProcRepository _storedProcRepository,
-    IBranchService _branchService
+    IBranchService _branchService,
+    IScheduleGeneratorService _scheduleGeneratorService
 ) : IBranchSheduleService
 {
     private const string _spAdminLabSchedule = "sp_AdminLabSchedule";
@@ -320,7 +323,7 @@ public class BranchSheduleService
     public async Task<GetAllBranchScheduleResponse> GetAllBranchScheduleAsync()
     {
         try
-        {            
+        {
             var branches = await _branchService.GetBranchAsync();
             if (branches.ServiceStatus.Code != 200)
             {
@@ -344,6 +347,48 @@ public class BranchSheduleService
         catch (Exception ex)
         {
             return new(null!, new(500, ex.Message));
+        }
+    }
+
+    public async Task<GetLabCustomerSchedulerDateTimeResponse> GetLabCustomerSchedulerDateTimeAsync(GetLabCustomerSchedulerDateTimeRequest request)
+    {
+        try
+        {
+            DynamicParameters sp_parameters = new();
+            sp_parameters.Add("Action", "SEL", DbType.String);
+            sp_parameters.Add("@IdLabBranch", request.IdBranch, DbType.Int64);
+            var branchSchedule = await _storedProcRepository.Initialize(_spAdminLabSchedule, sp_parameters)
+                .ReturnCollection<LabBranchSchedule>();
+
+            var scheduleMonth = _scheduleGeneratorService.GenerateSchedule(request.Month);
+            List<DateTime> schedule = new();
+            foreach (var item in scheduleMonth!)
+            {
+                foreach (var element in branchSchedule!)
+                {
+                    if (element.DayOfWeek == _scheduleGeneratorService.GetDayOfWeek(item.DayOfWeek.ToString()))
+                    {
+                        var scheduleHour = _scheduleGeneratorService.GenerateScheduleHour(item, element.TimeInit, element.TimeEnd);
+                        schedule.AddRange(scheduleHour);
+                    }
+                }
+            }
+
+            IList<ScheduleDateDtoItem>? _dataResult =
+                scheduleMonth
+                .Select(x => new ScheduleDateDtoItem(x.Day,
+                schedule.Where(r => r.Day.Equals(x.Day))
+                .Select(s => new ScheduleHourDtoItem(s.ToShortTimeString(), false)).ToList()))
+                .ToList();
+
+            var branchScheduleTemp = await _storedProcRepository.Initialize(_spAdminLabScheduleTemp, sp_parameters)
+                .ReturnCollection<LabBranchScheduleTemp>();
+
+            return new(_dataResult.Where(d => d.Hours.Count > 0).ToList(), new());
+        }
+        catch (Exception ex)
+        {
+            return new(null, new(500, ex.Message));
         }
     }
 }

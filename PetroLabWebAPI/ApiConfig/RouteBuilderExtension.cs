@@ -206,7 +206,17 @@ public static class RouteBuilderExtension
         }).WithName("GetAllBranchSchedule")
         .WithOpenApi()
         .RequireAuthorization()
-        .Produces<GetAllBranchScheduleResponse>();        
+        .Produces<GetAllBranchScheduleResponse>();
+
+        group.MapPost("/getbranchschedulecalendar", async (IBranchSheduleService _service,
+        [FromBody] GetLabCustomerSchedulerDateTimeRequest request) =>
+        {
+            var response = await _service.GetLabCustomerSchedulerDateTimeAsync(request);
+            return response;
+        }).WithName("GetLabCustomerSchedulerDateTime")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabCustomerSchedulerDateTimeResponse>();
 
         return group;
     }
@@ -294,7 +304,7 @@ public static class RouteBuilderExtension
         }).WithName("CancelCustomerSchedule")
         .WithOpenApi()
         .RequireAuthorization()
-        .Produces<CommonActionResponse>();        
+        .Produces<CommonActionResponse>();
 
         group.MapPost("/getcustomerschedule", async (ICustomerScheduleService _service,
             [FromBody] LabCustomerScheduleFilterRequest request) =>
@@ -308,7 +318,7 @@ public static class RouteBuilderExtension
 
         return group;
     }
-    
+
     public static RouteGroupBuilder MapDoctorApi(this RouteGroupBuilder group)
     {
         group.MapPost("/createdoctor", async (IDoctorService _service,

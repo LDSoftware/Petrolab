@@ -1,6 +1,7 @@
 using PetroLabWebAPI.ServiceDto.Branch.Request;
 using PetroLabWebAPI.ServiceDto.Branch.Response;
 using PetroLabWebAPI.ServiceDto.Common;
+using PetroLabWebAPI.ServiceDto.Schedule.Response;
 
 namespace PetroLabWebAPI.Services.Operation;
 
@@ -17,4 +18,5 @@ public interface IBranchSheduleService
     Task<CommonActionResponse> RemoveScheduleTempAsync(long Id);
     Task<GetBranchScheduleResponse> GetBranchScheduleAsync(long IdBranch);
     Task<GetAllBranchScheduleResponse> GetAllBranchScheduleAsync();
+    Task<GetLabCustomerSchedulerDateTimeResponse> GetLabCustomerSchedulerDateTimeAsync(GetLabCustomerSchedulerDateTimeRequest request);
 }
