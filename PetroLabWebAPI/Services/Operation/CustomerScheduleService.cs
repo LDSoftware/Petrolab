@@ -6,6 +6,7 @@ using PetroLabWebAPI.Data.Repository;
 using PetroLabWebAPI.ServiceDto.Common;
 using PetroLabWebAPI.ServiceDto.Schedule.Request;
 using PetroLabWebAPI.ServiceDto.Schedule.Response;
+using PetroLabWebAPI.Services.Helpers;
 
 namespace PetroLabWebAPI.Services.Operation;
 
@@ -44,6 +45,22 @@ public class CustomerScheduleService
     {
         try
         {
+            var customerSchedule = await GetLabCustomerScheduleResponseAsync(
+                new LabCustomerScheduleFilterRequest(StarDate: DateTime.Parse(request.StarDate.ToShortDateString()),
+                EndDate: DateTime.Parse(request.EndDate.ToShortDateString()),
+                IdBranch: request.IdBranch,
+                IdLabStudio: request.IdLabStudio,
+                Cancel: false));
+            ITimeRangeService<DateTime> _timeRangeService = new TimeRangeService(request.StarDate, request.EndDate.AddMinutes(-1));
+            foreach (var item in customerSchedule.DataResult!)
+            {
+                ITimeRangeService<DateTime> _scheduleTimeRangeService = new TimeRangeService(item.StarDate.AddMinutes(1), item.EndDate.AddMinutes(-1));
+                if (_timeRangeService.Includes(_scheduleTimeRangeService) || _scheduleTimeRangeService.Includes(_timeRangeService))
+                {
+                    throw new Exception("El horario seleccionado se encuentra ocupado.");
+                }
+            }
+
             DynamicParameters sp_parameters = new();
             sp_parameters.Add("Action", "INS", DbType.String);
             sp_parameters.Add("Name", request.Name, DbType.String);

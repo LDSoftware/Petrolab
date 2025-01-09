@@ -381,9 +381,12 @@ public class BranchSheduleService
                 {
                     if (isTempDay)
                     {
-                        var scheduleHour = _scheduleGeneratorService
-                        .GenerateScheduleHour(item, scheduleTemp!.TimeInit, scheduleTemp.TimeEnd, labStudio.DataResult!.Duration);
-                        schedule.AddRange(scheduleHour);
+                        if (element.DayOfWeek == _scheduleGeneratorService.GetDayOfWeek(item.DayOfWeek.ToString()))
+                        {
+                            var scheduleHour = _scheduleGeneratorService
+                            .GenerateScheduleHour(item, scheduleTemp!.TimeInit, scheduleTemp.TimeEnd, labStudio.DataResult!.Duration);
+                            schedule.AddRange(scheduleHour);
+                        }
                     }
                     else
                     {
@@ -407,17 +410,29 @@ public class BranchSheduleService
 
             IList<ScheduleDateDtoItem>? _dataResult =
                 scheduleMonth
-                .Select(x => new ScheduleDateDtoItem(x.ToString("dd/MM/yyyy"),
+                .Select(x => new ScheduleDateDtoItem(x.ToString("yyyy-MM-dd"),
                 schedule.Where(r => r.Day.Equals(x.Day))
                 .Select(s => new ScheduleHourDtoItem(s.ToString("HH:mm:ss"), false)).ToList()))
                 .ToList();
 
-            /*             foreach (var item in customerSchedule.DataResult!)
+            if (customerSchedule.ServiceStatus.Code == 200 && customerSchedule.DataResult!.Any())
+            {
+                foreach (var item in customerSchedule.DataResult!)
+                {
+                    ITimeRangeService<DateTime> timeRangeService = new TimeRangeService(item.StarDate, item.EndDate);
+                    foreach (var element in _dataResult)
+                    {
+                        foreach (var hour in element.Hours)
                         {
-
-                            var scheduleDate = _dataResult.FirstOrDefault(d => d.Day == item.StarDate.Day);
+                            DateTime date = DateTime.Parse($"{element.Day} {hour.Hour}");
+                            if (timeRangeService.Includes(date))
+                            {
+                                hour.IsReserved = true;
+                            }
                         }
-             */
+                    }
+                }
+            }
 
             return new(_dataResult.Where(d => d.Hours.Count > 0).ToList(), new());
         }

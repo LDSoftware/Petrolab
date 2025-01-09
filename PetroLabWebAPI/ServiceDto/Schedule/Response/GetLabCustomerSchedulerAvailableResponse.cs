@@ -6,6 +6,10 @@ public class GetLabCustomerSchedulerDateTimeResponse(IList<ScheduleDateDtoItem>?
     : GetCommonReponse<IList<ScheduleDateDtoItem>?>(_dataResult, _commonActionResponse);
 
 public record ScheduleDateDtoItem(string Day, IList<ScheduleHourDtoItem> Hours);
-public record ScheduleHourDtoItem(string Hour, bool IsReserved);
+public class ScheduleHourDtoItem(string _Hour, bool _IsReserved)
+{
+    public string Hour { get => _Hour; set => _Hour = value; }
+    public bool IsReserved { get => _IsReserved; set => _IsReserved = value; }
+}
 public record GetLabCustomerSchedulerDateTimeRequest(long IdBranch, long IdLabStudio, DateTime startDate, DateTime endDate);
 
