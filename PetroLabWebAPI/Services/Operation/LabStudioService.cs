@@ -15,8 +15,7 @@ public class LabStudioService
     IRepository<LabSpecialty> _specialtyRepository,
     IRepository<GetLabStudioDtoItem> _getLabStudioRepository,
     IRepository<LabSpecialityGamas> _specialityGamasRepository,
-    StoredProcRepository _storedProcRepository,
-    IMapper _mapper
+    StoredProcRepository _storedProcRepository
 ) : ILabStudioService
 {
     private const string spName = "sp_AdminLabStudio";
