@@ -15,7 +15,9 @@ public class BranchSheduleService
 (
     StoredProcRepository _storedProcRepository,
     IBranchService _branchService,
-    IScheduleGeneratorService _scheduleGeneratorService
+    IScheduleGeneratorService _scheduleGeneratorService,
+    ICustomerScheduleService _customerScheduleService,
+    ILabStudioService _labStudioService
 ) : IBranchSheduleService
 {
     private const string _spAdminLabSchedule = "sp_AdminLabSchedule";
@@ -374,12 +376,31 @@ public class BranchSheduleService
                 }
             }
 
+            var customerSchedule = await _customerScheduleService
+                .GetLabCustomerScheduleResponseAsync(new LabCustomerScheduleFilterRequest(
+                    StarDate: scheduleMonth.First(),
+                    EndDate: scheduleMonth.Last(),
+                    IdLabStudio: request.IdLabStudio,
+                    IdBranch: request.IdBranch,
+                    Cancel: false));
+
             IList<ScheduleDateDtoItem>? _dataResult =
                 scheduleMonth
                 .Select(x => new ScheduleDateDtoItem(x.Day,
                 schedule.Where(r => r.Day.Equals(x.Day))
                 .Select(s => new ScheduleHourDtoItem(s.ToShortTimeString(), false)).ToList()))
                 .ToList();
+
+            foreach (var item in customerSchedule.DataResult!)
+            {
+                var labStudio = await _labStudioService.GetLabStudioByIdAsync(item.Id);
+                if (labStudio.ServiceStatus.Code != 200)
+                {
+                    throw new Exception(labStudio.ServiceStatus.Message);
+                }
+
+                var scheduleDate = _dataResult.FirstOrDefault(d => d.Day == item.StarDate.Day);
+            }
 
             var branchScheduleTemp = await _storedProcRepository.Initialize(_spAdminLabScheduleTemp, sp_parameters)
                 .ReturnCollection<LabBranchScheduleTemp>();
