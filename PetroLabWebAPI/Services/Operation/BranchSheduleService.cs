@@ -1,5 +1,6 @@
 using System.Data;
 using Dapper;
+using Microsoft.Identity.Client;
 using PetroLabWebAPI.Data.Domain;
 using PetroLabWebAPI.Data.ExecutionModel;
 using PetroLabWebAPI.Data.Repository;
@@ -17,7 +18,8 @@ public class BranchSheduleService
     IBranchService _branchService,
     IScheduleGeneratorService _scheduleGeneratorService,
     ICustomerScheduleService _customerScheduleService,
-    ILabStudioService _labStudioService
+    ILabStudioService _labStudioService,
+    IDoctorService _doctorService
 ) : IBranchSheduleService
 {
     private const string _spAdminLabSchedule = "sp_AdminLabSchedule";
@@ -45,6 +47,7 @@ public class BranchSheduleService
                     throw new Exception(result.Message);
                 }
             }
+
             return new();
         }
         catch (Exception ex)
@@ -57,6 +60,13 @@ public class BranchSheduleService
     {
         try
         {
+            bool deleteConfig = await DeleteBranchConfiguration(request.IdLabBranch);
+
+            if(!deleteConfig)
+            {
+                throw new Exception("Error al eliminar configuración de la sucursal");
+            }
+
             DynamicParameters sp_parameters = new();
             foreach (var item in request.Schedule)
             {
@@ -77,6 +87,7 @@ public class BranchSheduleService
                 sp_parameters.Add("Action", "INS", DbType.String);
                 sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
                 sp_parameters.Add("Day", item.Day, DbType.DateTime);
+                sp_parameters.Add("IdDoctor", item.IdDoctor, DbType.Int64);
                 sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
                 sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
                 var result = await _storedProcRepository
@@ -268,6 +279,21 @@ public class BranchSheduleService
     {
         try
         {
+            DynamicParameters sp_parameters = new();
+            foreach (var item in request.Schedule)
+            {
+                sp_parameters = new DynamicParameters();
+                sp_parameters.Add("Action", "UPD", DbType.String);
+                sp_parameters.Add("Id", item.Id, DbType.Int64);                
+                sp_parameters.Add("IdLabBranch", request.IdLabBranch, DbType.Int64);
+                sp_parameters.Add("DayOfWeek", item.DayOfWeek, DbType.String);
+                sp_parameters.Add("TimeInit", item.TimeInit, DbType.String);
+                sp_parameters.Add("TimeEnd", item.TimeEnd, DbType.String);
+                var result = await _storedProcRepository
+                .Initialize(_spAdminLabSchedule, sp_parameters)
+                .Execute<CommonExecutionModel>();
+            }
+
             var responseUpdateSchduleTemp = await UpdateScheduleTempAsync(
                 new(request.IdLabBranch, request.ScheduleTemp));
 
@@ -286,6 +312,7 @@ public class BranchSheduleService
     {
         try
         {
+            var doctors = await _doctorService.GetDoctorAsync(IdBranch);
             var branch = await _branchService.GetBranchByIdAsync(IdBranch);
             if (branch.ServiceStatus.Code != 200)
             {
@@ -311,14 +338,22 @@ public class BranchSheduleService
                     Branch: branch.DataResult,
                     BranchSchedule: branchSchedule!.Select(x => new BranchScheduleDtoItem(x.Id, x.IdLabBranch, x.DayOfWeek, x.TimeInit, x.TimeEnd)).ToList(),
                     BranchScheduleTemp: branchScheduleTemp!.Select(x => new BranchScheduleTempDtoItem(x.Id, x.IdLabBranch, x.Day, x.TimeInit, x.TimeEnd, x.IdDoctor)).ToList(),
-                    BranchScheduleDoctor: branchScheduleDoctor!.Select(x => new BranchScheduleDoctorDtoItem(x.Id, x.IdLabBranch, x.TimeInit, x.TimeEnd, x.DoctorId)).ToList()
+                    BranchScheduleDoctor: branchScheduleDoctor!
+                    .Select(x => new BranchScheduleDoctorDtoItem(
+                    x.Id,
+                    x.IdLabBranch,
+                    x.TimeInit,
+                    x.TimeEnd,
+                    x.DoctorId,
+                    x.DoctorName
+                    )).ToList()
                 ),
                 new()
             );
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return new(null!, new(500, "Error"));
+            return new(null!, new(500, ex.Message));
         }
     }
 
@@ -441,4 +476,42 @@ public class BranchSheduleService
             return new(null, new(500, ex.Message));
         }
     }
+
+    private async Task<bool> DeleteBranchConfiguration(long IdBranch)
+    {
+        try
+        {
+            DynamicParameters sp_parameters = new();
+
+            // Eliminar Schedule
+            sp_parameters.Add("Action", "DEL", DbType.String);
+            sp_parameters.Add("IdLabBranch", IdBranch, DbType.Int64);
+            var resultDelSchedule = await _storedProcRepository
+            .Initialize(_spAdminLabSchedule, sp_parameters)
+            .Execute<CommonExecutionModel>();
+
+            // Eliminar Doctor
+            sp_parameters = new();            
+            sp_parameters.Add("Action", "DEL", DbType.String);
+            sp_parameters.Add("IdLabBranch", IdBranch, DbType.Int64);
+            var resultDelDoc = await _storedProcRepository
+            .Initialize(_spAdminLabScheduleDoctor, sp_parameters)
+            .Execute<CommonExecutionModel>();
+
+            // ELiminar schedule temporal
+            sp_parameters = new();            
+            sp_parameters.Add("Action", "DEL", DbType.String);
+            sp_parameters.Add("IdLabBranch", IdBranch, DbType.Int64);
+            var resultDelTemp = await _storedProcRepository
+            .Initialize(_spAdminLabScheduleTemp, sp_parameters)
+            .Execute<CommonExecutionModel>();
+            
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+    }
+
 }

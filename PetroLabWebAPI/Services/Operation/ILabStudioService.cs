@@ -14,4 +14,5 @@ public interface ILabStudioService
     Task<GetLabStudioByIdResponse> GetLabStudioByIdAsync(long Id);
     Task<GetLabSpecialtyResponse> GetLabStudioBySpecialtyAsync();
     Task<GetLabSpecialityGamasResponse> GetLabSpecialityGamasAsync();
+    Task<GetLabStudioByBrachResponse> GetLabStudioByBranchAsync(long IdBranch);
 }

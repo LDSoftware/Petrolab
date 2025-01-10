@@ -1,5 +1,4 @@
 using System.Data;
-using AutoMapper;
 using Dapper;
 using PetroLabWebAPI.Data.Domain;
 using PetroLabWebAPI.Data.Repository;
@@ -79,10 +78,10 @@ public class LabStudioService
             if (result is not null && result.Any())
             {
                 foreach (var speciality in groups)
-                {                    
+                {
                     var labStudios = result.Where(s => s.SpecialityId.Equals(speciality.Id))
-                        .Select(r => new { r.Id, r.Code, r.Type, r.Name, r.SpecialityName });                        
-                    items.Add(new LabSpecialityGamasDtoItem(speciality.Id,speciality.Name, labStudios
+                        .Select(r => new { r.Id, r.Code, r.Type, r.Name, r.SpecialityName });
+                    items.Add(new LabSpecialityGamasDtoItem(speciality.Id, speciality.Name, labStudios
                     .Select(x => new LabSpecialityGamaDtoItem(x.Id, x.Name, x.Code, x.Type, speciality.Id, x.SpecialityName))
                     .ToList()));
                 }
@@ -106,6 +105,27 @@ public class LabStudioService
             List<GetLabStudioDtoItem> items = new();
             {
                 items.AddRange(result.Select(x => new GetLabStudioDtoItem(x.Id, x.Code, x.Type, x.Name, x.Duration, x.Specialty, x.SpecialtyName)));
+            }
+            return new(items, new());
+        }
+        catch (Exception ex)
+        {
+            return new(null, new(500, ex.Message));
+        }
+    }
+
+    public async Task<GetLabStudioByBrachResponse> GetLabStudioByBranchAsync(long IdBranch)
+    {
+        try
+        {
+            DynamicParameters sp_parameters = new DynamicParameters();
+            sp_parameters.Add("Action", "SEB", DbType.String);
+            sp_parameters.Add("IdBranch", IdBranch, DbType.String);
+            var result = await _storedProcRepository.Initialize(spName, sp_parameters).ReturnCollection<LabStudioByBranch>();
+            List<GetLabStudioByBrachDtoItem> items = new();
+            if (result is not null && result.Any())
+            {
+                items.AddRange(result.Select(x => new GetLabStudioByBrachDtoItem(x.Id, x.Code, x.Name)));
             }
             return new(items, new());
         }
