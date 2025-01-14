@@ -7,4 +7,7 @@ string Role,
 string FistName,
 string LastName,
 string MotherLastName,
-List<long> Branch);
+List<SelectedBrach> Branch);
+
+
+public record SelectedBrach(long BranchId, bool IsPrincipal);

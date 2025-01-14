@@ -11,6 +11,8 @@ using PetroLabWebAPI.Security.Claims;
 using PetroLabWebAPI.Security.Config;
 using PetroLabWebAPI.Security.Entity;
 using PetroLabWebAPI.Services;
+using PetroLabWebAPI.Services.Helpers;
+using PetroLabWebAPI.Services.Operation;
 using PetroLabWebAPI.Services.Security.Jwt;
 using PetroLabWebAPI.Services.Security.Login;
 using PetroLabWebAPI.Services.Security.RoleManagment;
@@ -93,10 +95,16 @@ builder.Services.AddTransient<IRoleManagmentService, RoleManagmentService>();
 builder.Services.AddTransient<IUserManagmentService, UserManagmentService>();
 builder.Services.AddTransient<ISecurityTokenService, SecurityTokenService>();
 builder.Services.AddTransient<IIdentityClaimService, IdentityClaimService>();
+builder.Services.AddTransient<IBranchSheduleService, BranchSheduleService>();
+builder.Services.AddTransient<ICustomerScheduleService, CustomerScheduleService>();
+builder.Services.AddTransient<IScheduleGeneratorService, ScheduleGeneratorService>();
 builder.Services.AddTransient<ValidateNoDuplicateBranchOnUser>();
 builder.Services.AddTransient<InsertNewBrachCommand>();
 builder.Services.AddTransient<ValidateNoDuplicateLabStudioOnDoctor>();
 builder.Services.AddTransient<InsertNewLabStudioCommand>();
+builder.Services.AddTransient<InsertNewDoctorCommand>();
+builder.Services.AddTransient<ValidateNoDuplicateDoctorOnBranch>();
+builder.Services.AddTransient<StoredProcRepository>();
 builder.Services.AddAutoMapper(typeof(Program));
 
 builder.Services.AddCors(options =>

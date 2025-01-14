@@ -141,18 +141,18 @@ public class DoctorService
         }
     }
 
-    public async Task<List<GetLabStudioDtoItem>> GetLabStudiosByDoctor(long IdDoctor)
+    public async Task<List<GetDoctorLabStudioDtoItem>> GetLabStudiosByDoctor(long IdDoctor)
     {
         try
         {
-            List<GetLabStudioDtoItem> response = new();
+            List<GetDoctorLabStudioDtoItem> response = new();
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "SEL", DbType.String);
             sp_parameters.Add("IdLabDoctor", IdDoctor, DbType.Int64);
             var result = await _labStudioDoctorMapRepository.Initialize(spNameManageLabStudio, sp_parameters).Table();
             if (result.Any())
             {
-                response.AddRange(result.Select(r => new GetLabStudioDtoItem(r.IdLabStudio, r.Code, r.Name)));
+                response.AddRange(result.Select(r => new GetDoctorLabStudioDtoItem(r.IdLabStudio, r.Code, r.Name)));
             }
             return response;
         }

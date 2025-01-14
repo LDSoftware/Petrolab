@@ -1,5 +1,4 @@
 using System.Data;
-using AutoMapper;
 using Dapper;
 using PetroLabWebAPI.Data.Domain;
 using PetroLabWebAPI.Data.Repository;
@@ -12,10 +11,15 @@ namespace PetroLabWebAPI.Services;
 public class LabStudioService
 (
     IRepository<LabStudio> _repository,
-    IMapper _mapper
+    IRepository<LabSpecialty> _specialtyRepository,
+    IRepository<GetLabStudioDtoItem> _getLabStudioRepository,
+    IRepository<LabSpecialityGamas> _specialityGamasRepository,
+    StoredProcRepository _storedProcRepository
 ) : ILabStudioService
 {
     private const string spName = "sp_AdminLabStudio";
+    private const string spSpecialtyName = "sp_GetLabSpecialty";
+    private const string spGetLabSpecialityGamas = "sp_GetLabSpecialityGamas";
 
     public async Task<CreateActionResponse> CreateAsync(CreateLabStudioRequest request)
     {
@@ -27,6 +31,7 @@ public class LabStudioService
             sp_parameters.Add("Type", request.Type, DbType.Int32);
             sp_parameters.Add("Name", request.Name, DbType.String);
             sp_parameters.Add("Duration", request.Duration, DbType.Int32);
+            sp_parameters.Add("Speciality", request.Speciality, DbType.Int64);
             var result = await _repository.Initialize(spName, sp_parameters).InsertOrUpdate();
             if (!result.Success)
             {
@@ -61,16 +66,66 @@ public class LabStudioService
         }
     }
 
+    public async Task<GetLabSpecialityGamasResponse> GetLabSpecialityGamasAsync()
+    {
+        try
+        {
+            DynamicParameters sp_parameters = new();
+            var groups = await _specialtyRepository.Initialize(spSpecialtyName, sp_parameters).Table();
+            var result = await _specialityGamasRepository.Initialize(spGetLabSpecialityGamas, sp_parameters).Table();
+            List<LabSpecialityGamasDtoItem> items = new();
+
+            if (result is not null && result.Any())
+            {
+                foreach (var speciality in groups)
+                {
+                    var labStudios = result.Where(s => s.SpecialityId.Equals(speciality.Id))
+                        .Select(r => new { r.Id, r.Code, r.Type, r.Name, r.SpecialityName });
+                    items.Add(new LabSpecialityGamasDtoItem(speciality.Id, speciality.Name, labStudios
+                    .Select(x => new LabSpecialityGamaDtoItem(x.Id, x.Name, x.Code, x.Type, speciality.Id, x.SpecialityName))
+                    .ToList()));
+                }
+            }
+
+            return new(items, new());
+        }
+        catch (Exception ex)
+        {
+            return new(null, new(500, ex.Message));
+        }
+    }
+
     public async Task<GetLabStudioResponse> GetLabStudioAsync()
     {
         try
         {
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "SEL", DbType.String);
-            var result = await _repository.Initialize(spName, sp_parameters).Table();
-            List<LabStudioDtoItem> items = new();
+            var result = await _getLabStudioRepository.Initialize(spName, sp_parameters).Table();
+            List<GetLabStudioDtoItem> items = new();
             {
-                items.AddRange(_mapper.Map<List<LabStudioDtoItem>>(result));
+                items.AddRange(result.Select(x => new GetLabStudioDtoItem(x.Id, x.Code, x.Type, x.Name, x.Duration, x.Specialty, x.SpecialtyName)));
+            }
+            return new(items, new());
+        }
+        catch (Exception ex)
+        {
+            return new(null, new(500, ex.Message));
+        }
+    }
+
+    public async Task<GetLabStudioByBrachResponse> GetLabStudioByBranchAsync(long IdBranch)
+    {
+        try
+        {
+            DynamicParameters sp_parameters = new DynamicParameters();
+            sp_parameters.Add("Action", "SEB", DbType.String);
+            sp_parameters.Add("IdBranch", IdBranch, DbType.String);
+            var result = await _storedProcRepository.Initialize(spName, sp_parameters).ReturnCollection<LabStudioByBranch>();
+            List<GetLabStudioByBrachDtoItem> items = new();
+            if (result is not null && result.Any())
+            {
+                items.AddRange(result.Select(x => new GetLabStudioByBrachDtoItem(x.Id, x.Code, x.Name)));
             }
             return new(items, new());
         }
@@ -87,13 +142,32 @@ public class LabStudioService
             DynamicParameters sp_parameters = new DynamicParameters();
             sp_parameters.Add("Action", "SEI", DbType.String);
             sp_parameters.Add("Id", Id, DbType.String);
-            var result = await _repository.Initialize(spName, sp_parameters).GetById();
+            var result = await _storedProcRepository.Initialize(spName, sp_parameters).ReturnCollection<GetLabStudio>();
             LabStudioDtoItem item = null!;
             if (result is not null)
             {
-                item = _mapper.Map<LabStudioDtoItem>(result);
+                item = new(result.First().Id, result.First().Code, result.First().Type, result.First().Name, result.First().Duration, result.First().Specialty);
             }
             return new(item, new());
+        }
+        catch (Exception ex)
+        {
+            return new(null, new(500, ex.Message));
+        }
+    }
+
+    public async Task<GetLabSpecialtyResponse> GetLabStudioBySpecialtyAsync()
+    {
+        try
+        {
+            DynamicParameters sp_parameters = new();
+            var result = await _specialtyRepository.Initialize(spSpecialtyName, sp_parameters).Table();
+            List<LabSpecialtyDtoItem> items = new();
+            if (result is not null && result.Any())
+            {
+                items.AddRange(result.Select(x => new LabSpecialtyDtoItem(x.Id, x.Name)));
+            }
+            return new(items, new());
         }
         catch (Exception ex)
         {
@@ -106,12 +180,13 @@ public class LabStudioService
         try
         {
             DynamicParameters sp_parameters = new DynamicParameters();
-            sp_parameters.Add("Action", "INS", DbType.String);
+            sp_parameters.Add("Action", "UPD", DbType.String);
             sp_parameters.Add("Id", request.Id, DbType.Int64);
             sp_parameters.Add("Code", request.Code, DbType.String);
             sp_parameters.Add("Type", request.Type, DbType.Int32);
             sp_parameters.Add("Name", request.Name, DbType.String);
             sp_parameters.Add("Duration", request.Duration, DbType.Int32);
+            sp_parameters.Add("Speciality", request.Speciality, DbType.Int64);
             var result = await _repository.Initialize(spName, sp_parameters).InsertOrUpdate();
             if (!result.Success)
             {

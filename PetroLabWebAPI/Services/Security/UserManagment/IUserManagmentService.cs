@@ -13,5 +13,6 @@ public interface IUserManagmentService
     Task<GetUsersResponse> GetUsers();
     Task<List<UserBranchDtoItem>> GetBranchByUser(string UserId);
     Task<CommonActionResponse> InsertNewBranchOnUser(ManageUserBranchsRequest request);
-    Task<CommonActionResponse> DeleteBranchOnUser(ManageUserBranchsRequest request);
+    Task<CommonActionResponse> DeleteBranchOnUser(DelteUserBranchsRequest request);
+    Task<CommonActionResponse> SetBranchToPrincipal(UpdateUserBranchToPrincipalRequest request);
 }

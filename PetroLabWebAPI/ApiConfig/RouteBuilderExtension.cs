@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PetroLabWebAPI.ServiceDto.Branch.Request;
 using PetroLabWebAPI.ServiceDto.Branch.Response;
@@ -9,10 +8,13 @@ using PetroLabWebAPI.ServiceDto.Doctor.Request;
 using PetroLabWebAPI.ServiceDto.Doctor.Response;
 using PetroLabWebAPI.ServiceDto.LabStudio.Request;
 using PetroLabWebAPI.ServiceDto.LabStudio.Response;
+using PetroLabWebAPI.ServiceDto.Schedule.Request;
+using PetroLabWebAPI.ServiceDto.Schedule.Response;
 using PetroLabWebAPI.ServiceDto.Security.Login;
 using PetroLabWebAPI.ServiceDto.Security.RoleManagment;
 using PetroLabWebAPI.ServiceDto.Security.UserManagment;
 using PetroLabWebAPI.Services;
+using PetroLabWebAPI.Services.Operation;
 using PetroLabWebAPI.Services.Security.Login;
 using PetroLabWebAPI.Services.Security.RoleManagment;
 using PetroLabWebAPI.Services.Security.UserManagment;
@@ -72,6 +74,150 @@ public static class RouteBuilderExtension
         .RequireAuthorization()
         .Produces<GetBranchResponse>();
 
+        group.MapPost("/createnewdoctortobranch", async (InsertNewDoctorCommand _service,
+            [FromBody] CreateDoctorBranchRequest request) =>
+        {
+            _service.Request = request;
+            var response = await _service.ExecuteAsync();
+            return response;
+        }).WithName("CreateNewDoctorToBranch")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CreateActionResponse>();
+
+        group.MapDelete("/deletenewdoctortobranch", async (IBranchService _service,
+            [FromBody] DeleteDoctorBranchRequest request) =>
+        {
+            var response = await _service.DeleteDoctorToBranch(request);
+            return response;
+        }).WithName("DeleteNewDoctorToBranch")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CreateActionResponse>();
+
+        return group;
+    }
+
+    public static RouteGroupBuilder MapScheduleBranchApi(this RouteGroupBuilder group)
+    {
+
+        group.MapPost("/createbranchwithschedule", async (IBranchSheduleService _service,
+            [FromBody] CreateBranchWithScheduleRequest request) =>
+        {
+            var response = await _service.CreateBranchWithSchedule(request);
+            return response;
+        }).WithName("CreateBranchWithSchedule").WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CreateActionResponse>();
+
+        group.MapPost("/addschedulebranch", async (IBranchSheduleService _service,
+            [FromBody] CreateBranchScheduleRequest request) =>
+        {
+            var response = await _service.AddScheduleAsync(request);
+            return response;
+        }).WithName("AddSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPost("/addschedulebranchtemp", async (IBranchSheduleService _service,
+            [FromBody] CreateScheduleTempRequest request) =>
+        {
+            var response = await _service.AddScheduleTempAsync(request);
+            return response;
+        }).WithName("AddScheduleTemp")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPost("/addschedulebranchdoctor", async (IBranchSheduleService _service,
+            [FromBody] CreateScheduleDoctorRequest request) =>
+        {
+            var response = await _service.AddScheduleDoctorAsync(request);
+            return response;
+        }).WithName("AddDoctor")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/updateschedulebranch", async (IBranchSheduleService _service,
+            [FromBody] UpdateBranchScheduleRequest request) =>
+        {
+            var response = await _service.UpdateScheduleAsync(request);
+            return response;
+        }).WithName("UpdateSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/updateschedulebranchtemp", async (IBranchSheduleService _service,
+            [FromBody] UpdateScheduleTempRequest request) =>
+        {
+            var response = await _service.UpdateScheduleTempAsync(request);
+            return response;
+        }).WithName("UpdateScheduleTemp")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/updateschedulebranchdoctor", async (IBranchSheduleService _service,
+            [FromBody] UpdateScheduleDoctorRequest request) =>
+        {
+            var response = await _service.UpdateScheduleDoctorAsync(request);
+            return response;
+        }).WithName("UpdateScheduleDoctor")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapDelete("/removeschedulebranchdoctor", async (IBranchSheduleService _service,
+            [FromBody] long IdDoctor) =>
+        {
+            var response = await _service.RemoveDoctorAsync(IdDoctor);
+            return response;
+        })
+        .WithName("RemoveDoctor")
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapDelete("/removeschedulebranchtemp", async (IBranchSheduleService _service,
+            [FromBody] long IdScheduleTemp) =>
+        {
+            var response = await _service.RemoveScheduleTempAsync(IdScheduleTemp);
+            return response;
+        })
+        .WithName("RemoveScheduleTemp")
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapGet("/getbranchschedule", async (long idBranch, IBranchSheduleService _service) =>
+        {
+            var response = await _service.GetBranchScheduleAsync(idBranch);
+            return response;
+        }).WithName("GetBranchSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetBranchScheduleResponse>();
+
+        group.MapGet("/getallbranchschedule", async (IBranchSheduleService _service) =>
+        {
+            var response = await _service.GetAllBranchScheduleAsync();
+            return response;
+        }).WithName("GetAllBranchSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetAllBranchScheduleResponse>();
+
+        group.MapPost("/getbranchschedulecalendar", async (IBranchSheduleService _service,
+        [FromBody] GetLabCustomerSchedulerDateTimeRequest request) =>
+        {
+            var response = await _service.GetLabCustomerSchedulerDateTimeAsync(request);
+            return response;
+        }).WithName("GetLabCustomerSchedulerDateTime")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabCustomerSchedulerDateTimeResponse>();
+
         return group;
     }
 
@@ -124,6 +270,51 @@ public static class RouteBuilderExtension
         .WithOpenApi()
         .RequireAuthorization()
         .Produces<GetCustomerByIdResponse>();
+
+        return group;
+    }
+
+    public static RouteGroupBuilder MapCustomerScheduleApi(this RouteGroupBuilder group)
+    {
+        group.MapPost("/createcustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] CreateCustomerScheduleRequest request) =>
+        {
+            var response = await _service.CreateCustomerScheduleAsync(request);
+            return response;
+        }).WithName("CreateCustomerSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/updatecustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] UpdateCustomerScheduleRequest request) =>
+        {
+            var response = await _service.UpdateCustomerScheduleAsync(request);
+            return response;
+        }).WithName("UpdateCustomerSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapDelete("/cancelcustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] CancelCustomerScheduleRequest request) =>
+        {
+            var response = await _service.CancelCustomerScheduleAsync(request);
+            return response;
+        }).WithName("CancelCustomerSchedule")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPost("/getcustomerschedule", async (ICustomerScheduleService _service,
+            [FromBody] LabCustomerScheduleFilterRequest request) =>
+        {
+            var response = await _service.GetLabCustomerScheduleResponseAsync(request);
+            return response;
+        }).WithName("GetLabCustomerScheduleResponse")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabCustomerScheduleResponse>();
 
         return group;
     }
@@ -251,6 +442,34 @@ public static class RouteBuilderExtension
         .WithOpenApi()
         .RequireAuthorization()
         .Produces<GetLabStudioByIdResponse>();
+
+
+        group.MapGet("/getlabstudiospeciality", async (ILabStudioService _service) =>
+        {
+            var response = await _service.GetLabStudioBySpecialtyAsync();
+            return response;
+        }).WithName("GetLabStudioBySpecialtyAsync")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabSpecialtyResponse>();
+
+        group.MapGet("/getlabstudiospecialitygamas", async (ILabStudioService _service) =>
+        {
+            var response = await _service.GetLabSpecialityGamasAsync();
+            return response;
+        }).WithName("GetLabSpecialityGamas")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabSpecialityGamasResponse>();
+
+        group.MapGet("/getlabstudiobybrach", async (long IdBranch, ILabStudioService _service) =>
+        {
+            var response = await _service.GetLabStudioByBranchAsync(IdBranch);
+            return response;
+        }).WithName("GetLabStudioByBranch")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<GetLabStudioByBrachResponse>();
 
         return group;
     }
@@ -385,11 +604,21 @@ public static class RouteBuilderExtension
         .Produces<CommonActionResponse>();
 
         group.MapDelete("/deletebranchonuser", async (IUserManagmentService _service,
-            [FromBody] ManageUserBranchsRequest request) =>
+            [FromBody] DelteUserBranchsRequest request) =>
         {
             var response = await _service.DeleteBranchOnUser(request);
             return response;
         }).WithName("DeleteBranchOnUser")
+        .WithOpenApi()
+        .RequireAuthorization()
+        .Produces<CommonActionResponse>();
+
+        group.MapPut("/setbranchtoprincipal", async (IUserManagmentService _service,
+            [FromBody] UpdateUserBranchToPrincipalRequest request) =>
+        {
+            var response = await _service.SetBranchToPrincipal(request);
+            return response;
+        }).WithName("SetBranchToPrincipal")
         .WithOpenApi()
         .RequireAuthorization()
         .Produces<CommonActionResponse>();

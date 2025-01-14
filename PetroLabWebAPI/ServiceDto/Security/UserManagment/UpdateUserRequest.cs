@@ -7,5 +7,4 @@ string Password,
 string Role,
 string FistName,
 string LastName,
-string MotherLastName,
-long Branch);
+string MotherLastName);
